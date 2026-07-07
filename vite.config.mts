@@ -4,13 +4,16 @@ import {defineConfig} from 'vite';
 import checker from 'vite-plugin-checker';
 import {nodePolyfills} from 'vite-plugin-node-polyfills';
 import {VitePWA} from 'vite-plugin-pwa';
+import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 import packageJson from './package.json';
 
 export default defineConfig({
 	base: './',
 	build: {
 		outDir: 'dist/web',
-		target: browserslistToEsbuild(['>0.2%', 'not dead', 'not op_mini all'])
+		target: browserslistToEsbuild(['>0.2%', 'not dead', 'not op_mini all']),
+		sourcemap: 'inline'
 	},
 	define: {
 		// Make app name and version available to code.
@@ -52,7 +55,9 @@ export default defineConfig({
 			workbox: {
 				globPatterns: ['**/*.{js,css,html,svg,woff,woff2}']
 			}
-		})
+		}),
+		wasm(),
+		topLevelAwait()
 	],
 	server: {
 		open: true

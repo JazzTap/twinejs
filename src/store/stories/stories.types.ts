@@ -1,6 +1,7 @@
 import {Thunk} from 'react-hook-thunk-reducer';
 import {Color} from '../../util/color';
 import {StoryFormat} from '../story-formats/story-formats.types';
+import { AutomergeUrl } from '../../../automerge-repo/packages/automerge-repo/dist';
 
 /**
  * A single passage in a story.
@@ -211,4 +212,5 @@ export type TagColors = Record<string, Exclude<Color, 'none'>>;
 export interface StoriesContextProps {
 	dispatch: StoriesDispatch;
 	stories: Story[];
+	currentStoryUrl: React.MutableRefObject<AutomergeUrl | undefined>;
 }

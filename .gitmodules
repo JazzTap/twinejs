@@ -1,0 +1,3 @@
+[submodule "automerge-repo"]
+	path = automerge-repo
+	url = https://github.com/JazzTap/automerge-repo.git

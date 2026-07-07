@@ -4,7 +4,7 @@ import {MainContent} from '../../components/container/main-content';
 import {DocumentTitle} from '../../components/document-title/document-title';
 import {DialogsContextProvider} from '../../dialogs';
 import { usePrefsContext } from '../../store/prefs';
-import {storyWithId} from '../../store/stories';
+import {Story, storyWithId} from '../../store/stories';
 import {
 	UndoableStoriesContextProvider,
 	useUndoableStoriesContext
@@ -17,13 +17,28 @@ import {usePassageChangeHandlers} from './use-passage-change-handlers';
 import {useViewCenter} from './use-view-center';
 import {useZoomShortcuts} from './use-zoom-shortcuts';
 import {useZoomTransition} from './use-zoom-transition';
+import { AutomergeUrl, Repo, RepoContext } from "../../../automerge-repo/packages/automerge-react/src"
 import './story-edit-route.css';
+
+console.log('consumer context', RepoContext)
+
+// FIXME: hardcoded config pointing to live server.
+// FIXME: stand up development Automerge server on localhost alongside Vite.
+const DEBUG_LOCAL = false
+const serverURL = "https://duck-composed-closely.ngrok-free.app"
+
+// skip POST if DEBUG_LOCAL says we're on localhost, since CORS will fail
+function fetchOrElse(url: URL, options: RequestInit) {
+    if (DEBUG_LOCAL) { return {json: () => ({}) }; }
+    return fetch(url, options)
+}
 
 export const InnerStoryEditRoute: React.FC = () => {
 	const {storyId} = useParams<{storyId: string}>();
 	const {prefs} = usePrefsContext();
-	const {stories} = useUndoableStoriesContext();
+	const {stories, currentStoryUrl} = useUndoableStoriesContext();
 	const story = storyWithId(stories, storyId);
+	const repo = React.useContext(RepoContext)
 	const [fuzzyFinderOpen, setFuzzyFinderOpen] = React.useState(false);
 	const mainContent = React.useRef<HTMLDivElement>(null);
 	const {getCenter, setCenter} = useViewCenter(story, mainContent);
@@ -38,6 +53,45 @@ export const InnerStoryEditRoute: React.FC = () => {
 
 	useZoomShortcuts(story);
 	useInitialPassageCreation(story, getCenter);
+
+	React.useEffect(() => {
+
+		// Look up an individual story by GUID.
+		async function lookup() {
+			let headers = { "Content-Type": "application/json", }
+
+			// use the story ID to look up an Automerge URL
+			let instanceRaw = storyId
+			let req = await fetchOrElse(new URL(`${serverURL}/api/handle`), {
+				method: "POST",
+				headers,
+				body: JSON.stringify({"iid": instanceRaw})
+			})
+			let res = ((await req.json()) as any).result
+			let instance = res ? ('automerge:' + res as AutomergeUrl) : undefined
+
+			if (instance === undefined) {
+				// assign each unknown story ID a fresh Automerge URL
+				let handle = repo.create<Story>(story);
+        		let res = handle.url.split(':')[1]
+
+				// tell the server our instance slug
+				console.log("dummy assignment: ", JSON.stringify({"handle": res, "iid": storyId}))
+				/* fetchOrElse(new URL(`${serverURL}/api/assign`), {
+					method: "POST",
+					headers,
+					body: JSON.stringify({"handle": res, "iid": storyId})}
+				) */
+			}
+
+			currentStoryUrl.current = instance
+		}
+
+		// FIXME: get Automerge doc handle if it went stale, i.e. we switched stories
+		if (currentStoryUrl.current === undefined) {
+			lookup()
+		}
+	}, [])
 
 	return (
 		<div className="story-edit-route">
@@ -79,7 +133,7 @@ export const InnerStoryEditRoute: React.FC = () => {
 // This is a separate component so that the inner one can use
 // `useDialogsContext()` and `useUndoableStoriesContext()` inside it.
 
-export const StoryEditRoute: React.FC = () => (
+export const StoryEditRoute: React.FC<{repo: Repo}> = ({repo}) => (
 	<UndoableStoriesContextProvider>
 		<DialogsContextProvider>
 			<InnerStoryEditRoute />

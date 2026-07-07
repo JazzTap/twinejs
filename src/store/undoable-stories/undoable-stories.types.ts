@@ -1,5 +1,6 @@
 import {Thunk} from 'react-hook-thunk-reducer';
 import {StoriesAction, StoriesState} from '../stories';
+import { AutomergeUrl } from '../../../automerge-repo/packages/automerge-repo/dist';
 
 export type StoriesActionOrThunk =
 	| StoriesAction
@@ -49,4 +50,5 @@ export interface UndoableStoriesContextProps {
 	stories: StoriesState;
 	undo?: () => void;
 	undoLabel?: string;
+	currentStoryUrl: React.MutableRefObject<AutomergeUrl | undefined>;
 }
