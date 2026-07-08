@@ -18,7 +18,7 @@ export const UndoableStoriesContext = React.createContext<UndoableStoriesContext
 	{
 		dispatch: () => {},
 		stories: [],
-		currentStoryUrl: {current: undefined}, // pass through the Automerge document handle
+		storyUrl: {current: undefined}, // pass through the Automerge document handle
 	}
 );
 
@@ -28,7 +28,7 @@ export const useUndoableStoriesContext = () =>
 	React.useContext(UndoableStoriesContext);
 
 export const UndoableStoriesContextProvider: React.FC = props => {
-	const {dispatch: storiesDispatch, stories, currentStoryUrl} = useStoriesContext();
+	const {dispatch: storiesDispatch, stories, storyUrl} = useStoriesContext();
 	const [state, dispatch] = React.useReducer(reducer, {
 		changes: [],
 		currentChange: -1
@@ -86,7 +86,7 @@ export const UndoableStoriesContextProvider: React.FC = props => {
 				stories,
 				undo,
 				undoLabel,
-				currentStoryUrl
+				storyUrl
 			}}
 		>
 			{props.children}

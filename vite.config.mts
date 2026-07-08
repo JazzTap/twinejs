@@ -60,6 +60,7 @@ export default defineConfig({
 		topLevelAwait()
 	],
 	server: {
+		port: 8080, // to get through CORS on Automerge server
 		open: true
 	}
 });

@@ -212,5 +212,5 @@ export type TagColors = Record<string, Exclude<Color, 'none'>>;
 export interface StoriesContextProps {
 	dispatch: StoriesDispatch;
 	stories: Story[];
-	currentStoryUrl: React.MutableRefObject<AutomergeUrl | undefined>;
+	storyUrl: React.MutableRefObject<AutomergeUrl | undefined>;
 }

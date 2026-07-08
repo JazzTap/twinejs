@@ -196,6 +196,17 @@ export function storyTags(stories: Story[]) {
 	).sort();
 }
 
+// each multiplayer Twine story URL performs lookup by the IFID, not an instance ID
+export function storyWithIFId(stories: Story[], storyId: string) {
+	const result = stories.find(s => s.ifid === storyId);
+
+	if (result) {
+		return result;
+	}
+
+	throw new Error(`There is no story with IFID "${storyId}".`);
+}
+
 export function storyWithId(stories: Story[], storyId: string) {
 	const result = stories.find(s => s.id === storyId);
 

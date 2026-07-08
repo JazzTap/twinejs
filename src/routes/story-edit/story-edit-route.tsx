@@ -4,7 +4,7 @@ import {MainContent} from '../../components/container/main-content';
 import {DocumentTitle} from '../../components/document-title/document-title';
 import {DialogsContextProvider} from '../../dialogs';
 import { usePrefsContext } from '../../store/prefs';
-import {Story, storyWithId} from '../../store/stories';
+import {Story, storyWithIFId} from '../../store/stories';
 import {
 	UndoableStoriesContextProvider,
 	useUndoableStoriesContext
@@ -17,10 +17,8 @@ import {usePassageChangeHandlers} from './use-passage-change-handlers';
 import {useViewCenter} from './use-view-center';
 import {useZoomShortcuts} from './use-zoom-shortcuts';
 import {useZoomTransition} from './use-zoom-transition';
-import { AutomergeUrl, Repo, RepoContext } from "../../../automerge-repo/packages/automerge-react/src"
+import { AutomergeUrl, Repo } from "../../../automerge-repo/packages/automerge-react/src"
 import './story-edit-route.css';
-
-console.log('consumer context', RepoContext)
 
 // FIXME: hardcoded config pointing to live server.
 // FIXME: stand up development Automerge server on localhost alongside Vite.
@@ -33,12 +31,13 @@ function fetchOrElse(url: URL, options: RequestInit) {
     return fetch(url, options)
 }
 
-export const InnerStoryEditRoute: React.FC = () => {
-	const {storyId} = useParams<{storyId: string}>();
+export const InnerStoryEditRoute: React.FC<{repo: Repo}> = ({repo}) => {
+	const {ifid} = useParams<{ifid: string}>();
 	const {prefs} = usePrefsContext();
-	const {stories, currentStoryUrl} = useUndoableStoriesContext();
-	const story = storyWithId(stories, storyId);
-	const repo = React.useContext(RepoContext)
+	const {dispatch, stories, storyUrl} = useUndoableStoriesContext();
+	const story = storyWithIFId(stories, ifid);
+	const storyId = story.id;
+	
 	const [fuzzyFinderOpen, setFuzzyFinderOpen] = React.useState(false);
 	const mainContent = React.useRef<HTMLDivElement>(null);
 	const {getCenter, setCenter} = useViewCenter(story, mainContent);
@@ -56,7 +55,7 @@ export const InnerStoryEditRoute: React.FC = () => {
 
 	React.useEffect(() => {
 
-		// Look up an individual story by GUID.
+		// look up a canonical story by guid
 		async function lookup() {
 			let headers = { "Content-Type": "application/json", }
 
@@ -68,28 +67,39 @@ export const InnerStoryEditRoute: React.FC = () => {
 				body: JSON.stringify({"iid": instanceRaw})
 			})
 			let res = ((await req.json()) as any).result
-			let instance = res ? ('automerge:' + res as AutomergeUrl) : undefined
+			let instance;
 
-			if (instance === undefined) {
+			if (res === false) {
 				// assign each unknown story ID a fresh Automerge URL
 				let handle = repo.create<Story>(story);
-        		let res = handle.url.split(':')[1]
+				instance = handle.url
+				let urlSlug = handle.url.split(':')[1]
 
 				// tell the server our instance slug
-				console.log("dummy assignment: ", JSON.stringify({"handle": res, "iid": storyId}))
-				/* fetchOrElse(new URL(`${serverURL}/api/assign`), {
+				console.log("assign handle: ", JSON.stringify({"handle": urlSlug, "iid": storyId}))
+				fetchOrElse(new URL(`${serverURL}/api/assign`), {
 					method: "POST",
 					headers,
-					body: JSON.stringify({"handle": res, "iid": storyId})}
-				) */
+					body: JSON.stringify({"handle": urlSlug, "iid": storyId})}
+				)
+			} else {
+				console.log("found handle: ", 
+					JSON.stringify({"handle": res,
+									"iid": storyId}))
+				instance = 'automerge:' + res as AutomergeUrl
 			}
 
-			currentStoryUrl.current = instance
+			storyUrl.current = instance
 		}
 
 		// FIXME: get Automerge doc handle if it went stale, i.e. we switched stories
-		if (currentStoryUrl.current === undefined) {
+		// if (storyUrl.current === undefined) { storyUrl.current = await lookup() }
+		if (storyUrl.current === undefined) {
 			lookup()
+			// FIXME: queue incoming edits until storyUrl.current resolves to an instance
+			// dispatch(
+				// updateStory(stories, stories[0], {name: 'mock-story-rename'})
+			// )
 		}
 	}, [])
 
@@ -136,7 +146,7 @@ export const InnerStoryEditRoute: React.FC = () => {
 export const StoryEditRoute: React.FC<{repo: Repo}> = ({repo}) => (
 	<UndoableStoriesContextProvider>
 		<DialogsContextProvider>
-			<InnerStoryEditRoute />
+			<InnerStoryEditRoute repo={repo} />
 		</DialogsContextProvider>
 	</UndoableStoriesContextProvider>
 );

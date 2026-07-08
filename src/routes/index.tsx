@@ -14,11 +14,9 @@ import {
    RepoContext,
    Repo } from '../../automerge-repo/packages/automerge-react/src'
 
-console.log('consumer context', RepoContext)
-
 const repo = new Repo({
   network: [new BroadcastChannelNetworkAdapter(),
-	    	new WebSocketClientAdapter("wss://sync.automerge.org"), // duck-composed-closely.ngrok-free.app
+	    	new WebSocketClientAdapter("wss://duck-composed-closely.ngrok-free.app"), 
   ], // FIXME
   storage: new IndexedDBStorageAdapter(),
 });
@@ -32,45 +30,43 @@ export const Routes: React.FC = () => {
 	// differ between web and Electron contexts.
 
 	return (
-		<RepoContext.Provider value={repo}>
-			<HashRouter>
-				{prefs.welcomeSeen ? (
-					<Switch>
-						<Route exact path="/">
-							<StoryListRoute />
-						</Route>
-						<Route path="/welcome">
-							<WelcomeRoute />
-						</Route>
-						<Route path="/stories/:storyId/play">
-							<StoryPlayRoute />
-						</Route>
-						<Route path="/stories/:storyId/proof">
-							<StoryProofRoute />
-						</Route>
-						<Route path="/stories/:storyId/test/:passageId">
-							<StoryTestRoute />
-						</Route>
-						<Route path="/stories/:storyId/test">
-							<StoryTestRoute />
-						</Route>
-						<Route path="/stories/:storyId">
-							<StoryEditRoute repo={repo} />
-						</Route>
-						<Route
-							path="*"
-							render={path => {
-								console.warn(
-									`No route for path "${path.location.pathname}", rendering story list`
-								);
-								return <StoryListRoute />;
-							}}
-						></Route>
-					</Switch>
-				) : (
-					<WelcomeRoute />
-				)}
-			</HashRouter>
-		</RepoContext.Provider>
+		<HashRouter>
+			{prefs.welcomeSeen ? (
+				<Switch>
+					<Route exact path="/">
+						<StoryListRoute />
+					</Route>
+					<Route path="/welcome">
+						<WelcomeRoute />
+					</Route>
+					<Route path="/stories/:storyId/play">
+						<StoryPlayRoute />
+					</Route>
+					<Route path="/stories/:storyId/proof">
+						<StoryProofRoute />
+					</Route>
+					<Route path="/stories/:storyId/test/:passageId">
+						<StoryTestRoute />
+					</Route>
+					<Route path="/stories/:storyId/test">
+						<StoryTestRoute />
+					</Route>
+					<Route path="/stories/:ifid">
+						<StoryEditRoute repo={repo} />
+					</Route>
+					<Route
+						path="*"
+						render={path => {
+							console.warn(
+								`No route for path "${path.location.pathname}", rendering story list`
+							);
+							return <StoryListRoute />;
+						}}
+					></Route>
+				</Switch>
+			) : (
+				<WelcomeRoute />
+			)}
+		</HashRouter>
 	);
 };

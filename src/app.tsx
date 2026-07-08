@@ -9,6 +9,18 @@ import {StoryFormatsContextProvider} from './store/story-formats';
 import {StateLoader} from './store/state-loader';
 import {ThemeSetter} from './store/theme-setter';
 import './styles/typography.css';
+import {
+  BroadcastChannelNetworkAdapter,
+  WebSocketClientAdapter,
+  IndexedDBStorageAdapter,
+   Repo } from "../automerge-repo/packages/automerge-react/src"
+
+const repo = new Repo({
+  network: [new BroadcastChannelNetworkAdapter(),
+			new WebSocketClientAdapter("wss://duck-composed-closely.ngrok-free.app"), 
+  ], // FIXME
+  storage: new IndexedDBStorageAdapter(),
+});
 
 export const App: React.FC = () => (
 	<GlobalErrorBoundary>
@@ -16,10 +28,10 @@ export const App: React.FC = () => (
 			<LocaleSwitcher />
 			<ThemeSetter />
 			<StoryFormatsContextProvider>
-				<StoriesContextProvider>
+				<StoriesContextProvider repo={repo}>
 					<StateLoader>
 						<React.Suspense fallback={<LoadingCurtain />}>
-							<Routes />
+							<Routes repo={repo} />
 						</React.Suspense>
 					</StateLoader>
 				</StoriesContextProvider>

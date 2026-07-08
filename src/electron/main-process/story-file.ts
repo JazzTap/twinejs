@@ -67,7 +67,7 @@ export async function saveStoryHtml(story: Story, storyHtml: string) {
 
 	try {
 		const tempFileDirectory = await mkdtemp(
-			join(app.getPath('temp'), `twine-${story.id}`)
+			join(app.getPath('temp'), `twine-${story.ifid}`)
 		);
 		const tempFilePath = join(tempFileDirectory, storyFileName(story));
 

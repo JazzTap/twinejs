@@ -50,5 +50,5 @@ export interface UndoableStoriesContextProps {
 	stories: StoriesState;
 	undo?: () => void;
 	undoLabel?: string;
-	currentStoryUrl: React.MutableRefObject<AutomergeUrl | undefined>;
+	storyUrl: React.MutableRefObject<AutomergeUrl | undefined>;
 }
