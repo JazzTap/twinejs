@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useScrollbarSize} from 'react-scrollbar-size';
+import useScrollbarSize from 'react-scrollbar-size';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
 import {useDialogsContext} from '.';
 import {usePrefsContext} from '../../store/prefs';

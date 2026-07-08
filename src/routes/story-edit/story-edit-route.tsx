@@ -33,12 +33,13 @@ function fetchOrElse(url: URL, options: RequestInit) {
     return fetch(url, options)
 }
 
-export const InnerStoryEditRoute: React.FC = () => {
+export const InnerStoryEditRoute: React.FC<{repo: Repo}> = ({repo}) => {
 	const {storyId} = useParams<{storyId: string}>();
 	const {prefs} = usePrefsContext();
 	const {stories, currentStoryUrl} = useUndoableStoriesContext();
 	const story = storyWithId(stories, storyId);
-	const repo = React.useContext(RepoContext)
+	// const repo = React.useContext(RepoContext) // use prop drilling instead
+	
 	const [fuzzyFinderOpen, setFuzzyFinderOpen] = React.useState(false);
 	const mainContent = React.useRef<HTMLDivElement>(null);
 	const {getCenter, setCenter} = useViewCenter(story, mainContent);
@@ -136,7 +137,7 @@ export const InnerStoryEditRoute: React.FC = () => {
 export const StoryEditRoute: React.FC<{repo: Repo}> = ({repo}) => (
 	<UndoableStoriesContextProvider>
 		<DialogsContextProvider>
-			<InnerStoryEditRoute />
+			<InnerStoryEditRoute repo={repo} />
 		</DialogsContextProvider>
 	</UndoableStoriesContextProvider>
 );

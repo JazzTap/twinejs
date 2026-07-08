@@ -18,7 +18,7 @@ console.log('consumer context', RepoContext)
 
 const repo = new Repo({
   network: [new BroadcastChannelNetworkAdapter(),
-	    	new WebSocketClientAdapter("wss://sync.automerge.org"), // duck-composed-closely.ngrok-free.app
+	    	new WebSocketClientAdapter("wss://duck-composed-closely.ngrok-free.app"), 
   ], // FIXME
   storage: new IndexedDBStorageAdapter(),
 });

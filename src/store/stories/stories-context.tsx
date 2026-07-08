@@ -7,7 +7,7 @@ import {
 	StoriesAction,
 	StoriesState
 } from './stories.types';
-import { AutomergeUrl, useDocument } from '../../../automerge-repo/packages/automerge-react';
+import { AutomergeUrl, Repo, useDocument } from '../../../automerge-repo/packages/automerge-react';
 import {useStoryFormatsContext} from '../story-formats';
 import {useStoreErrorReporter} from '../use-store-error-reporter';
 import { Story } from './stories.types';
@@ -22,12 +22,12 @@ StoriesContext.displayName = 'Stories';
 
 export const useStoriesContext = () => React.useContext(StoriesContext);
 
-export const StoriesContextProvider: React.FC = props => {
+export const StoriesContextProvider: React.FC<{repo: Repo}> = props => {
 	const {stories: storiesPersistence} = usePersistence();
 	const {formats} = useStoryFormatsContext();
 	const {reportError} = useStoreErrorReporter();
   	const currentStoryUrl = React.useRef<AutomergeUrl | undefined>(undefined);
-	const [doc, changeDoc] = useDocument<Story>(currentStoryUrl.current, {
+	const [doc, changeDoc] = useDocument<Story>(currentStoryUrl.current, props.repo, {
 		// don't use suspense; currentStoryUrl only gets defined after we load a StoryEditRoute
 		suspense: false,
 	});
