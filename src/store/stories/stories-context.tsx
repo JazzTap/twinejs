@@ -43,14 +43,16 @@ export const StoriesContextProvider: React.FC<{repo: Repo}> = props => {
 			const newState = reducer(state, action);
 
 			// TODO: mp tinewjs focused on updatePassage and updatePassages during proof of concept
-			console.log("saveMiddleware")
+			if (action.type == "updatePassages" || action.type == "updatePassage") {
+				const updated = storyWithId(newState, action.storyId)
 
-			console.log(newState)
-			console.log(action)
-			// const story = storyWithId(newState, action.storyId);
-			changeDoc((d: Story) => {
-				
-			})
+				// write to server
+				changeDoc((d: Story) => {
+					d.passages = updated.passages
+					d.lastUpdate = updated.lastUpdate
+				})
+
+			}
 
 			// then persist through the browser / Electron middleware:
 			try {

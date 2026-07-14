@@ -4,7 +4,7 @@ import {MainContent} from '../../components/container/main-content';
 import {DocumentTitle} from '../../components/document-title/document-title';
 import {DialogsContextProvider} from '../../dialogs';
 import { usePrefsContext } from '../../store/prefs';
-import {Story, storyWithIFId} from '../../store/stories';
+import {Story, storyWithIFId, updateStory} from '../../store/stories';
 import {
 	UndoableStoriesContextProvider,
 	useUndoableStoriesContext
@@ -17,7 +17,8 @@ import {usePassageChangeHandlers} from './use-passage-change-handlers';
 import {useViewCenter} from './use-view-center';
 import {useZoomShortcuts} from './use-zoom-shortcuts';
 import {useZoomTransition} from './use-zoom-transition';
-import { AutomergeUrl, Repo } from "../../../automerge-repo/packages/automerge-react/src"
+import { AutomergeUrl, Repo, useDocument,
+	UseDocumentReturn, Doc, ChangeFn } from "../../../automerge-repo/packages/automerge-react"
 import './story-edit-route.css';
 
 // FIXME: hardcoded config pointing to live server.
@@ -37,6 +38,7 @@ export const InnerStoryEditRoute: React.FC<{repo: Repo}> = ({repo}) => {
 	const {dispatch, stories, storyUrl} = useUndoableStoriesContext();
 	const story = storyWithIFId(stories, ifid);
 	const storyId = story.id;
+	const [storyDoc, editStory] = useDocument<Story>(storyUrl.current, repo, { suspense: false });
 	
 	const [fuzzyFinderOpen, setFuzzyFinderOpen] = React.useState(false);
 	const mainContent = React.useRef<HTMLDivElement>(null);
@@ -60,7 +62,7 @@ export const InnerStoryEditRoute: React.FC<{repo: Repo}> = ({repo}) => {
 			let headers = { "Content-Type": "application/json", }
 
 			// use the story ID to look up an Automerge URL
-			let instanceRaw = storyId
+			let instanceRaw = ifid
 			let req = await fetchOrElse(new URL(`${serverURL}/api/handle`), {
 				method: "POST",
 				headers,
@@ -76,16 +78,16 @@ export const InnerStoryEditRoute: React.FC<{repo: Repo}> = ({repo}) => {
 				let urlSlug = handle.url.split(':')[1]
 
 				// tell the server our instance slug
-				console.log("assign handle: ", JSON.stringify({"handle": urlSlug, "iid": storyId}))
+				console.log("assign handle: ", JSON.stringify({"handle": urlSlug, "iid": ifid}))
 				fetchOrElse(new URL(`${serverURL}/api/assign`), {
 					method: "POST",
 					headers,
-					body: JSON.stringify({"handle": urlSlug, "iid": storyId})}
+					body: JSON.stringify({"handle": urlSlug, "iid": ifid})}
 				)
 			} else {
 				console.log("found handle: ", 
 					JSON.stringify({"handle": res,
-									"iid": storyId}))
+									"iid": ifid}))
 				instance = 'automerge:' + res as AutomergeUrl
 			}
 
@@ -96,12 +98,15 @@ export const InnerStoryEditRoute: React.FC<{repo: Repo}> = ({repo}) => {
 		// if (storyUrl.current === undefined) { storyUrl.current = await lookup() }
 		if (storyUrl.current === undefined) {
 			lookup()
-			// FIXME: queue incoming edits until storyUrl.current resolves to an instance
-			// dispatch(
-				// updateStory(stories, stories[0], {name: 'mock-story-rename'})
-			// )
 		}
 	}, [])
+
+	// handle incoming edits through storyDoc (once storyUrl.current has resolved)
+	React.useEffect(() => {
+		if (storyDoc !== undefined) {
+			dispatch( updateStory(stories, story, storyDoc ))
+		}
+	}, [storyDoc])
 
 	return (
 		<div className="story-edit-route">
