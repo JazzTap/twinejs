@@ -196,6 +196,16 @@ export function storyTags(stories: Story[]) {
 	).sort();
 }
 
+export function storyWithIfid(stories: Story[], storyIfid: string) {
+	const result = stories.find(s => s.ifid === storyIfid);
+
+	if (result) {
+		return result;
+	}
+
+	throw new Error(`There is no story with IFID "${storyIfid}".`);
+}
+
 export function storyWithId(stories: Story[], storyId: string) {
 	const result = stories.find(s => s.id === storyId);
 

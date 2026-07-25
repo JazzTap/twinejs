@@ -42,6 +42,16 @@ export const StoriesContextProvider: React.FC = props => {
 	);
 	const [stories, dispatch] = useThunkReducer(persistedReducer, []);
 
+	React.useEffect(() => {
+		// Share the dispatch function with the persistence layer so that if it
+		// wants to, it can send actions after load to sync local state with the
+		// persistence layer.
+
+		if (dispatch && storiesPersistence.setDispatch) {
+			storiesPersistence.setDispatch(dispatch);
+		}
+	}, [dispatch, storiesPersistence]);
+
 	return (
 		<StoriesContext.Provider value={{dispatch, stories}}>
 			{props.children}
