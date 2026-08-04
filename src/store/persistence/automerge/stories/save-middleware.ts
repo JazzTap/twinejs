@@ -7,12 +7,30 @@ import {
 import {getOrCreateDocHandleForStory} from './repo';
 
 export function saveMiddleware(state: StoriesState, action: StoriesAction) {
+	console.log("automerge middleware", state, action)
+
 	switch (action.type) {
 		case 'createStory': {
 			if (!action.props.name) {
 				throw new Error('Story was created but with no name specified');
 			}
 			getOrCreateDocHandleForStory(storyWithName(state, action.props.name));
+			break;
+		}
+
+		case 'updatePassage':
+		case 'updatePassages': {
+			const story = storyWithId(state, action.storyId);
+			const docHandle = getOrCreateDocHandleForStory(story);
+		
+			// const newState = reducer(state, action);
+			// const updated = storyWithId(newState, action.storyId);
+
+			// write to server
+			docHandle.change((d: Story) => {
+				d.passages = story.passages
+				d.lastUpdate = story.lastUpdate
+			});
 			break;
 		}
 
