@@ -48,14 +48,15 @@ export async function saveMiddleware(state: StoriesState, action: StoriesAction)
 
 			console.log('Changing Automerge doc', action.props);
 			docHandle.change((edit: Story) => {
-				for (const prop in action.props) {
+				let prop: keyof typeof action.props; // Tell Typescript to accept dynamic props.
+				for (prop in action.props) {
 					if (Array.isArray(action.props[prop])) {
 						// Skip these for now because we need to reconcile them precisely.
 						console.log(`Skipping changing ${prop}`);
 						continue;
 					}
 
-					edit[prop] = action.props[prop];
+					edit[prop] = action.props[prop] as never; // Force the assignment.
 				}
 			});
 			break;
