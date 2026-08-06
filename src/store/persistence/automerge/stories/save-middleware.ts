@@ -6,22 +6,17 @@ import {
 } from '../../../stories/stories.types';
 import {getOrCreateDocHandleForStory} from './repo';
 
-export function saveMiddleware(state: StoriesState, action: StoriesAction) {
+export async function saveMiddleware(state: StoriesState, action: StoriesAction) {
 	console.log("automerge middleware", state, action)
 
 	switch (action.type) {
-		case 'createStory': {
-			if (!action.props.name) {
-				throw new Error('Story was created but with no name specified');
-			}
-			getOrCreateDocHandleForStory(storyWithName(state, action.props.name));
-			break;
-		}
-
+		// passage-level edits have already been actioned by the reducer into `state`
+		case 'createPassage':
+		case 'createPassages':
 		case 'updatePassage':
 		case 'updatePassages': {
 			const story = storyWithId(state, action.storyId);
-			const docHandle = getOrCreateDocHandleForStory(story);
+			const docHandle = await getOrCreateDocHandleForStory(story);
 		
 			// const newState = reducer(state, action);
 			// const updated = storyWithId(newState, action.storyId);
@@ -33,6 +28,14 @@ export function saveMiddleware(state: StoriesState, action: StoriesAction) {
 			});
 			break;
 		}
+		
+		case 'createStory': {
+			if (!action.props.name) {
+				throw new Error('Story was created but with no name specified');
+			}
+			await getOrCreateDocHandleForStory(storyWithName(state, action.props.name));
+			break;
+		}
 
 		case 'updateStory': {
 			if (action.source === 'persistence') {
@@ -41,7 +44,7 @@ export function saveMiddleware(state: StoriesState, action: StoriesAction) {
 			}
 
 			const story = storyWithId(state, action.storyId);
-			const docHandle = getOrCreateDocHandleForStory(story);
+			const docHandle = await getOrCreateDocHandleForStory(story);
 
 			console.log('Changing Automerge doc', action.props);
 			docHandle.change((edit: Story) => {

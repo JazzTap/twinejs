@@ -35,7 +35,8 @@ export function dispatchChangeFromAutomergeDoc(
 	dispatch({
 		type: 'updateStory',
 		storyId: event.doc.id,
-		props: event.doc,
+		// prevent `existing document` error from re-inserting a tracked object
+		props: structuredClone(event.doc),
 		source: 'persistence'
 	});
 }
