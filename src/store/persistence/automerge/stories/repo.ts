@@ -21,17 +21,21 @@ export const repo = new Repo({
 	// Using local broadcast only for now; can't communicate with external
 	// server when running on localhost without CORS being set up over there.
 	network: [
-		// @ts-expect-error TODO: upstream automerge types have gotten stale, share a repot
+		// @ts-expect-error TODO: upstream Automerge types have gotten stale, share a report
 		new BroadcastChannelNetworkAdapter(),
-		// @ts-expect-error
+		// @ts-expect-error same upstream Automerge type error as BroadcastChannel... adapter
 		new WebSocketClientAdapter(SERVER_SOCKET_URL), 
 	],
 	storage: new IndexedDBStorageAdapter()
 });
 
 // Exposing it globally for debugging.
+declare global {
+	interface Window {
+		repo?: Repo;
+	}
+}
 window.repo = repo;
-
 
 /**
  * A local map of story IFIDs -> Automerge doc URLs.
@@ -55,7 +59,7 @@ export async function loadStoryDocHandles() {
 	const savedUrls = window.localStorage.getItem('twine-TEST-automerge-urls');
 
 	if (savedUrls) {
-		let parsedSavedUrls = {};
+		let parsedSavedUrls: Record<string, string> = {};
 
 		try {
 			parsedSavedUrls = JSON.parse(savedUrls);
