@@ -120,7 +120,7 @@
 	},
 	"scripts": {
 		"analyze": "run-s build:web build:analyze",
-		"build": "run-s clean build:web",
+		"build": "run-s clean build:electron",
 		"build:analyze": "source-map-explorer 'dist/web/static/js/*.js'",
 		"build:docs": "cd docs/en && mdbook build",
 		"build:web": "tsc && vite build",

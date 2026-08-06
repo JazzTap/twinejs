@@ -10,7 +10,7 @@ import packageJson from './package.json';
 export default defineConfig({
 	base: '/',
 	build: {
-		outDir: 'dist',
+		outDir: 'dist/web',
 		target: browserslistToEsbuild(['>0.2%', 'not dead', 'not op_mini all'])
 	},
 	define: {
