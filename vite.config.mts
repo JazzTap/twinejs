@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react-swc';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 import {defineConfig} from 'vite';
 import checker from 'vite-plugin-checker';
+import wasm from 'vite-plugin-wasm';
 import {nodePolyfills} from 'vite-plugin-node-polyfills';
 import {VitePWA} from 'vite-plugin-pwa';
 import packageJson from './package.json';
@@ -31,6 +32,7 @@ export default defineConfig({
 			{include: [], globals: {global: true}}
 		),
 		react(),
+		wasm(),
 		VitePWA({
 			manifest: {
 				icons: [
@@ -55,6 +57,7 @@ export default defineConfig({
 		})
 	],
 	server: {
-		open: true
+		open: true,
+		port: 8080
 	}
 });

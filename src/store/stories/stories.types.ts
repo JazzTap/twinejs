@@ -117,6 +117,12 @@ export interface Story {
 
 export type StoriesState = Story[];
 
+/**
+ * Automerge persistence needs to mark an action as originating from itself so
+ * that it doesn't re-sync changes back and forth from Automerge.
+ */
+export type StoryActionSource = 'persistence';
+
 // Action types.
 
 export interface InitStoriesAction {
@@ -138,6 +144,7 @@ export interface CreateStoryAction {
 export interface UpdateStoryAction {
 	type: 'updateStory';
 	props: Partial<Omit<Story, 'id'>>;
+	source?: StoryActionSource;
 	storyId: string;
 }
 
