@@ -8,9 +8,9 @@ import {VitePWA} from 'vite-plugin-pwa';
 import packageJson from './package.json';
 
 export default defineConfig({
-	base: './',
+	base: '/',
 	build: {
-		outDir: 'dist/web',
+		outDir: 'dist',
 		target: browserslistToEsbuild(['>0.2%', 'not dead', 'not op_mini all'])
 	},
 	define: {
