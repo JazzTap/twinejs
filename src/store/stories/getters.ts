@@ -1,5 +1,6 @@
 import Fuse from 'fuse.js';
 import uniq from 'lodash/uniq';
+import {PrefsState} from '../prefs';
 import {Passage, StorySearchFlags, Story} from './stories.types';
 import {createRegExp} from '../../util/regexp';
 import {parseLinks} from '../../util/parse-links';
@@ -224,4 +225,39 @@ export function storyWithName(stories: Story[], name: string) {
 	}
 
 	throw new Error(`There is no story with name "${name}".`);
+}
+
+export function storyWithIfidOrPlaceholder(
+	stories: Story[],
+	storyId: string,
+	prefs: PrefsState
+): Story {
+	const result = stories.find(s => s.ifid === storyId);
+
+	if (result) {
+		return result;
+	}
+
+	return {
+		id: 'in-flight-placeholder',
+		ifid: storyId,
+		isProvisional: true,
+		lastUpdate: new Date(),
+		name: 'Getting remote story...',
+		passages: [],
+		script: '',
+		selected: false,
+		snapToGrid: false,
+		startPassage: '',
+		storyFormat: prefs.storyFormat.name,
+		storyFormatVersion: prefs.storyFormat.version,
+		stylesheet: '',
+		tags: [],
+		tagColors: {},
+		zoom: 1
+	};
+}
+
+export function storyWithIdOrUndefined(stories: Story[], storyId: string) {
+	return stories.find(s => s.id === storyId);
 }

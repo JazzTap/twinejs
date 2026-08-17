@@ -4,7 +4,8 @@ import {MainContent} from '../../components/container/main-content';
 import {DocumentTitle} from '../../components/document-title/document-title';
 import {DialogsContextProvider} from '../../dialogs';
 import { usePrefsContext } from '../../store/prefs';
-import {storyWithId} from '../../store/stories';
+import {ensureRemoteStory} from '../../store/persistence/automerge/stories'; // FIXME: middleware dependency
+import {storyWithIfidOrPlaceholder} from '../../store/stories';
 import {
 	UndoableStoriesContextProvider,
 	useUndoableStoriesContext
@@ -22,8 +23,8 @@ import './story-edit-route.css';
 export const InnerStoryEditRoute: React.FC = () => {
 	const {storyId} = useParams<{storyId: string}>();
 	const {prefs} = usePrefsContext();
-	const {stories} = useUndoableStoriesContext();
-	const story = storyWithId(stories, storyId);
+	const {dispatch, stories} = useUndoableStoriesContext();
+	const story = storyWithIfidOrPlaceholder(stories, storyId, prefs);
 	const [fuzzyFinderOpen, setFuzzyFinderOpen] = React.useState(false);
 	const mainContent = React.useRef<HTMLDivElement>(null);
 	const {getCenter, setCenter} = useViewCenter(story, mainContent);
@@ -38,6 +39,12 @@ export const InnerStoryEditRoute: React.FC = () => {
 
 	useZoomShortcuts(story);
 	useInitialPassageCreation(story, getCenter);
+
+	React.useEffect(() => {
+		if (storyId) {
+			dispatch(ensureRemoteStory(storyId));
+		}
+	}, [dispatch, storyId]);
 
 	return (
 		<div className="story-edit-route">

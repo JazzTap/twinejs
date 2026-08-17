@@ -2,7 +2,7 @@ import * as React from 'react';
 import {StoryCardProps} from '../story-card';
 
 export const StoryCard: React.FC<StoryCardProps> = props => (
-	<div data-testid={`mock-story-card-${props.story.id}`}>
+	<div data-testid={`mock-story-card-${props.story.ifid}`}>
 		<button
 			onClick={() => props.onChangeTagColor('mock-tag', 'mock-tag-color')}
 		>

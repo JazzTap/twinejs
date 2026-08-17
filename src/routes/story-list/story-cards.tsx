@@ -46,10 +46,10 @@ export const StoryCards: React.FC<StoryCardsProps> = props => {
 			<CardGroup columnWidth={cardWidth}>
 				<TransitionGroup component={null}>
 					{stories.map(story => (
-						<CSSTransition classNames="pop" key={story.id} timeout={200}>
+						<CSSTransition classNames="pop" key={story.ifid} timeout={200}>
 							<StoryCard
 								onChangeTagColor={handleChangeTagColor}
-								onEdit={() => history.push(`/stories/${story.id}`)}
+								onEdit={() => history.push(`/stories/${story.ifid}`)}
 								onRemoveTag={name => handleRemoveTag(story, name)}
 								onSelect={() => onSelectStory(story)}
 								story={story}

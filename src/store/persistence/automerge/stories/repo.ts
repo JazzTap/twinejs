@@ -110,7 +110,7 @@ export function allStoryDocHandles() {
  * Looks up a previously-assigned Automerge document handle for a story IFID
  * on the remote server. Returns the handle string, or undefined.
  */
-async function lookupRemoteHandle(ifid: string): Promise<string | undefined> {
+export async function lookupRemoteHandle(ifid: string): Promise<string | undefined> {
 	try {
 		const response = await fetch(`${SERVER_URL}/api/handle`, {
 			method: 'POST',
@@ -140,7 +140,7 @@ async function lookupRemoteHandle(ifid: string): Promise<string | undefined> {
  * Registers a newly-created document's handle with the server so other
  * clients can find it by IFID.
  */
-async function assignRemoteHandle(ifid: string, handle: string) {
+export async function assignRemoteHandle(ifid: string, handle: string) {
 	try {
 		const response = await fetch(`${SERVER_URL}/api/assign`, {
 			method: 'POST',
@@ -162,7 +162,7 @@ async function assignRemoteHandle(ifid: string, handle: string) {
  * Returns an Automerge doc handle for a story, keyed by IFID, creating it if need be.
  * FIXME: Down the road we should warn on IFID collision; blocked on user authentication.
  */
-export async function getOrCreateDocHandleForStory(story: Story) {
+export async function getOrCreateDocHandleForStory(story: Story, existingHandle?: DocHandle<Story>): Promise<DocHandle<Story>> {
 	if (!story.ifid) {
 		throw new Error(
 			"Can't get or create a doc handle for a story that has no IFID"
@@ -173,6 +173,13 @@ export async function getOrCreateDocHandleForStory(story: Story) {
 		`[repo] getOrCreateDocHandleForStory called for ${story.ifid}`,
 		{cached: story.ifid in storyAutomergeDocs, pending: story.ifid in pendingDocHandles}
 	);
+
+	if (existingHandle) {
+		console.log(`[repo] Registering upstream handle for ${story.ifid}`);
+		storyAutomergeDocs[story.ifid] = existingHandle;
+		saveStoryDocHandles();
+		return existingHandle;
+	}
 
 	// Return existing if we already have one locally.
 

@@ -22,7 +22,7 @@ export const DetailsButton: React.FC<DetailsButtonProps> = props => {
 				dispatch({
 					type: 'addDialog',
 					component: StoryDetailsDialog,
-					props: {storyId: story.id}
+					props: {storyId: story.ifid}
 				})
 			}
 		/>
