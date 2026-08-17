@@ -62,6 +62,10 @@ export interface Story {
 	 */
 	id: string;
 	/**
+	 * Are we looking up a remote Automerge story that isn't synced yet?
+	 */
+	isProvisional?: boolean;
+	/**
 	 * When the story was last changed.
 	 */
 	lastUpdate: Date;

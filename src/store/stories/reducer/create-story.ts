@@ -21,9 +21,9 @@ export function createStory(state: StoriesState, storyProps: Partial<Story>) {
 	}
 
 	const story: Story = {
-		id: uuid(),
+		id: storyProps?.id || uuid(),
 		...storyDefaults(),
-		ifid: uuid().toUpperCase(),
+		ifid: storyProps?.ifid ||uuid().toUpperCase(),
 		lastUpdate: new Date(),
 		passages: [],
 		tags: [],
