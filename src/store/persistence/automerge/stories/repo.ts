@@ -84,7 +84,18 @@ export async function loadStoryDocHandles() {
 }
 
 /**
+ * Clears a story reference from local storage. The story persists on the server, possibly orphaned.
+ */
+export function deleteStoryDocHandle(ifid: string) {
+	if (ifid in storyAutomergeDocs) {
+		delete storyAutomergeDocs[ifid];
+		saveStoryDocHandles();
+	}
+}
+
+/**
  * Saves the map of story IFIDs -> Automerge doc handles to local storage.
+ * TODO: Save a local copy of each story, so we can recover from reloading the page while offline.
  */
 export function saveStoryDocHandles() {
 	const serialized: Record<string, string> = {};

@@ -155,6 +155,7 @@ export interface UpdateStoryAction {
 export interface DeleteStoryAction {
 	type: 'deleteStory';
 	storyId: string;
+	storyIfId: string;
 }
 
 export interface CreatePassageAction {

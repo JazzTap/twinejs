@@ -18,7 +18,7 @@ export const EditStoryButton: React.FC<EditStoryButtonProps> = ({story}) => {
 			disabled={!story}
 			icon={<IconEdit />}
 			label={t('common.edit')}
-			onClick={() => history.push(`/stories/${story?.id}`)}
+			onClick={() => history.push(`/stories/${story?.ifid}`)}
 		/>
 	);
 };

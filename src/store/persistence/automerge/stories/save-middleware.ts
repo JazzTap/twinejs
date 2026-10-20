@@ -5,7 +5,10 @@ import {
 	Story,
 	Passage
 } from '../../../stories/stories.types';
-import {getOrCreateDocHandleForStory} from './repo';
+import {
+	getOrCreateDocHandleForStory,
+	deleteStoryDocHandle
+} from './repo';
 
 export async function saveMiddleware(state: StoriesState, action: StoriesAction) {
 	console.log("automerge middleware", state, action)
@@ -64,7 +67,7 @@ export async function saveMiddleware(state: StoriesState, action: StoriesAction)
 					: action.passageIds;
 
 			docHandle.change((d: Story) => {
-				let indexesToDelete: Array<number> = [];
+				const indexesToDelete: Array<number> = [];
 				d.passages.forEach((p,i) => {
 					if (deletedIds.includes(p.id)) {
 						indexesToDelete.push(i);
@@ -84,7 +87,14 @@ export async function saveMiddleware(state: StoriesState, action: StoriesAction)
 			if (!action.props.name) {
 				throw new Error('Story was created but with no name specified');
 			}
-			await getOrCreateDocHandleForStory(storyWithName(state, action.props.name));
+			const story = storyWithName(state, action.props.name)
+			await getOrCreateDocHandleForStory(story);
+
+			const targetPath = `#/stories/` + story.ifid;
+			if (window.location.hash !== targetPath) {
+				history.replaceState(null, '', `${targetPath}`); // clobber bad URL from in-flight temporary ID
+				window.location.reload(); // force Automerge to pull, don't get stuck in push-only
+			}
 			break;
 		}
 
@@ -114,6 +124,11 @@ export async function saveMiddleware(state: StoriesState, action: StoriesAction)
 					edit[prop] = action.props[prop] as never; // Force the assignment.
 				}
 			});
+			break;
+		}
+
+		case 'deleteStory': {
+			deleteStoryDocHandle(action.storyIfId);
 			break;
 		}
 	}
