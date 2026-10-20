@@ -51,6 +51,34 @@ export async function saveMiddleware(state: StoriesState, action: StoriesAction)
 			});
 			break;
 		}
+
+		case 'deletePassage':
+		case 'deletePassages': {
+			const story = storyWithIdOrUndefined(state, action.storyId);
+			if (!story || story.isProvisional) break;
+
+			const docHandle = await getOrCreateDocHandleForStory(story);
+			const deletedIds =
+				action.type === 'deletePassage'
+					? [action.passageId]
+					: action.passageIds;
+
+			docHandle.change((d: Story) => {
+				let indexesToDelete: Array<number> = [];
+				d.passages.forEach((p,i) => {
+					if (deletedIds.includes(p.id)) {
+						indexesToDelete.push(i);
+					}
+				});
+				// delete passages from back to front of array
+				indexesToDelete.sort((a,b) => b - a).forEach((i) => {
+					d.passages.splice(i, 1);
+				})
+				console.log("removed passages", indexesToDelete);
+				d.lastUpdate = story.lastUpdate;
+			});
+			break;
+		}
 		
 		case 'createStory': {
 			if (!action.props.name) {
