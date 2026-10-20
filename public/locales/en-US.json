@@ -379,7 +379,7 @@
 				"deleteStoryButton": {
 					"warning": {
 						"electron": "Are you sure you want to delete “{{storyName}}”? It will be moved to the trash.",
-						"web": "Are you sure you want to delete “{{storyName}}”? It will be deleted forever. This cannot be undone."
+						"web": "Are you sure you want to delete “{{storyName}}”? It will be deleted from your Story List, but remains on the server until an admin removes it."
 					}
 				},
 				"showAllStories": "Show All Stories",
