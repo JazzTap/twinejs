@@ -128,7 +128,9 @@ export async function saveMiddleware(state: StoriesState, action: StoriesAction)
 		}
 
 		case 'deleteStory': {
-			deleteStoryDocHandle(action.storyIfId);
+			if (action.storyIfId) {
+				deleteStoryDocHandle(action.storyIfId);
+			}
 			break;
 		}
 	}
